@@ -1,0 +1,37 @@
+{
+  "topics": [
+    { "topic": "safety", "count": 18 },
+    { "topic": "efficacy", "count": 14 },
+    { "topic": "convenience", "count": 10 },
+    { "topic": "price", "count": 9 },
+    { "topic": "competition", "count": 8 }
+  ],
+  "sentimentSeries": [
+    { "month": "2025-12", "positive": 8, "neutral": 12, "negative": 6 },
+    { "month": "2026-01", "positive": 7, "neutral": 10, "negative": 9 },
+    { "month": "2026-02", "positive": 6, "neutral": 9, "negative": 11 },
+    { "month": "2026-03", "positive": 8, "neutral": 10, "negative": 12 },
+    { "month": "2026-04", "positive": 9, "neutral": 11, "negative": 10 },
+    { "month": "2026-05", "positive": 10, "neutral": 9, "negative": 8 }
+  ],
+  "topObjections": [
+    {
+      "clusterId": "c_safety_titration",
+      "title": "Побочные и титрация дозы",
+      "evidence": "Часто просят памятку по титрации и разбор НЯ."
+    },
+    {
+      "clusterId": "c_efficacy_rwe",
+      "title": "Сомнения в эффективности в подгруппах",
+      "evidence": "Нужны RWE/подгруппы (ХБП, коморбидность)."
+    }
+  ],
+  "topBenefits": [
+    {
+      "clusterId": "c_convenience_form",
+      "title": "Удобство формы выпуска",
+      "evidence": "Хвалят схему приёма — усилить в материалах."
+    }
+  ]
+}
+

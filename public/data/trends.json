@@ -1,0 +1,19 @@
+{
+  "topicSentimentSeries": [
+    { "month": "2025-12", "efficacyNeg": 0.18, "safetyNeg": 0.22, "priceNeg": 0.12 },
+    { "month": "2026-01", "efficacyNeg": 0.20, "safetyNeg": 0.25, "priceNeg": 0.14 },
+    { "month": "2026-02", "efficacyNeg": 0.24, "safetyNeg": 0.28, "priceNeg": 0.17 },
+    { "month": "2026-03", "efficacyNeg": 0.22, "safetyNeg": 0.34, "priceNeg": 0.15 },
+    { "month": "2026-04", "efficacyNeg": 0.19, "safetyNeg": 0.31, "priceNeg": 0.16 },
+    { "month": "2026-05", "efficacyNeg": 0.17, "safetyNeg": 0.29, "priceNeg": 0.15 }
+  ],
+  "emergingClusters": [
+    {
+      "clusterId": "c_safety_titration",
+      "title": "Побочные и титрация дозы",
+      "growthPct": 42,
+      "reason": "В марте–апреле выросло число запросов о НЯ и титрации после обсуждений в профессиональных чатах."
+    }
+  ]
+}
+

@@ -1,0 +1,40 @@
+---
+pid: 10840
+cwd: |
+  C:\Users\gilge
+---
+PS C:\Users\gilge> npm install
+npm : Имя "npm" не распознано как имя командлета, функции, файла сценария или выполняемой програм
+мы. Проверьте правильность написания имени, а также наличие и правильность пути, после чего повто
+рите попытку.
+строка:1 знак:1
++ npm install
++ ~~~
+    + CategoryInfo          : ObjectNotFound: (npm:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+PS C:\Users\gilge> git config --global user.name "Дарья"   
+git : Имя "git" не распознано как имя командлета, функции, файла сценария или выполняемой програм
+мы. Проверьте правильность написания имени, а также наличие и правильность пути, после чего повто
+рите попытку.
+строка:1 знак:1
++ git config --global user.name "Дарья"
++ ~~~
+    + CategoryInfo          : ObjectNotFound: (git:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+PS C:\Users\gilge> git --version
+git : Имя "git" не распознано как имя командлета, функции, файла сценария или выполняемой програм
+мы. Проверьте правильность написания имени, а также наличие и правильность пути, после чего повто
+рите попытку.
+строка:1 знак:1
++ git --version
++ ~~~
+    + CategoryInfo          : ObjectNotFound: (git:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+PS C:\Users\gilge> ^C
+PS C:\Users\gilge> 
+ *  History restored 
+
+PS C:\Users\gilge>

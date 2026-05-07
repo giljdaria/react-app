@@ -1,0 +1,6 @@
+---
+pid: 1808
+cwd: |
+  C:\Users\gilge
+---
+PS C:\Users\gilge>
