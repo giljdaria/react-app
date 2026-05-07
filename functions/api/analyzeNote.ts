@@ -6,6 +6,8 @@ const RequestSchema = z.object({
 });
 
 type Env = {
+  ANTHROPIC_API_KEY?: string;
+  ANTHROPIC_MODEL?: string;
   OPENROUTER_API_KEY?: string;
   OPENROUTER_MODEL?: string;
   OPENROUTER_SITE_URL?: string;
@@ -26,9 +28,61 @@ function errorResponse(message: string, status = 400) {
   return jsonResponse({ error: message }, status);
 }
 
+function extractFirstJsonObject(text: string) {
+  const s = text.indexOf("{");
+  if (s === -1) return null;
+  let depth = 0;
+  for (let i = s; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) return text.slice(s, i + 1);
+    }
+  }
+  return null;
+}
+
+async function callAnthropic(env: Env, prompt: string) {
+  const apiKey = env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("Не задан ANTHROPIC_API_KEY (добавьте secret в Cloudflare).");
+
+  const model = env.ANTHROPIC_MODEL ?? "claude-3-5-sonnet-latest";
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 800,
+      temperature: 0.1,
+      system: [
+        "Ты аналитический ассистент: классифицируй заметку визита по темам и тональности по каждой теме.",
+        "Возвращай ТОЛЬКО валидный JSON без markdown и без лишнего текста.",
+        "Строго следуй схеме из пользовательского сообщения.",
+      ].join(" "),
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Ошибка Anthropic: ${res.status} ${text}`);
+  }
+
+  const json = await res.json();
+  const content = json?.content?.[0]?.text;
+  if (typeof content !== "string" || !content.trim()) throw new Error("Пустой ответ модели.");
+  return content;
+}
+
 async function callOpenRouter(env: Env, prompt: string) {
   const apiKey = env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error("Missing OPENROUTER_API_KEY (set as Cloudflare secret).");
+  if (!apiKey) throw new Error("Не задан OPENROUTER_API_KEY (добавьте secret в Cloudflare).");
 
   const model = env.OPENROUTER_MODEL ?? "anthropic/claude-3.5-sonnet";
 
@@ -62,12 +116,12 @@ async function callOpenRouter(env: Env, prompt: string) {
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`OpenRouter error: ${res.status} ${text}`);
+    throw new Error(`Ошибка OpenRouter: ${res.status} ${text}`);
   }
 
   const json = await res.json();
   const content = json?.choices?.[0]?.message?.content;
-  if (typeof content !== "string" || !content.trim()) throw new Error("Empty model response.");
+  if (typeof content !== "string" || !content.trim()) throw new Error("Пустой ответ модели.");
   return content;
 }
 
@@ -77,27 +131,35 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     const { noteId, text } = RequestSchema.parse(raw);
 
     const prompt = [
-      "Classify the note into pharma themes and sentiment per theme.",
-      "Themes: efficacy, safety, price, convenience, competition, other.",
-      "Sentiment per theme: positive | neutral | negative.",
-      "Return JSON with schema:",
+      "Классифицируй заметку по темам и тональности по каждой теме.",
+      "Темы: efficacy, safety, price, convenience, competition, other.",
+      "Тональность по теме: positive | neutral | negative.",
+      "Верни JSON по схеме:",
       '{ "noteId": string, "topics": [{ "topic": "...", "sentiment": "...", "rationale": string }] }',
-      "Constraints:",
-      "- Return 1..6 topics. Do not invent extra keys.",
-      "- rationale should be short and grounded in the note text.",
+      "Ограничения:",
+      "- topics: 1..6. Не добавляй лишних ключей.",
+      "- rationale: коротко и строго по тексту заметки.",
       "",
       `noteId: ${noteId}`,
       `text: ${text}`,
     ].join("\n");
 
-    const content = await callOpenRouter(context.env, prompt);
+    const content = context.env.ANTHROPIC_API_KEY
+      ? await callAnthropic(context.env, prompt)
+      : await callOpenRouter(context.env, prompt);
 
     // Best-effort JSON parse; validate lightly.
     let parsed: any;
     try {
       parsed = JSON.parse(content);
     } catch {
-      return errorResponse("Model returned non-JSON. Adjust prompt or model.", 502);
+      const extracted = extractFirstJsonObject(content);
+      if (!extracted) return errorResponse("Модель вернула не-JSON. Проверьте модель/промпт.", 502);
+      try {
+        parsed = JSON.parse(extracted);
+      } catch {
+        return errorResponse("Модель вернула невалидный JSON. Проверьте модель/промпт.", 502);
+      }
     }
 
     if (parsed?.noteId !== noteId) parsed.noteId = noteId;

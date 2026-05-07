@@ -10,7 +10,6 @@ export function App() {
       <header className="nav">
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <strong>AI-анализатор обратной связи</strong>
-          <span className="badge">demo</span>
         </div>
         <nav className="navlinks">
           <NavLink className={({ isActive }) => `navlink ${isActive ? "active" : ""}`} to="/">

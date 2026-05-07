@@ -58,8 +58,8 @@ export function ImportPage() {
       <section className="card">
         <h2 style={{ marginTop: 0 }}>Импорт / ручной ввод</h2>
         <p className="muted" style={{ marginTop: 0 }}>
-          Для новых заметок сервис делает онлайн‑анализ через server-side API. Ключ OpenRouter живёт на сервере
-          (Functions), в браузер не попадает.
+          Для новых заметок сервис делает онлайн‑анализ через серверное API (Cloudflare Functions). Ключ доступа к
+          Claude хранится на сервере и в браузер не попадает.
         </p>
 
         <div className="grid" style={{ gap: 10 }}>

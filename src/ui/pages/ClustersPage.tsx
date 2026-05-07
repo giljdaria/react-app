@@ -34,8 +34,8 @@ export function ClustersPage() {
       <section className="card">
         <h2 style={{ marginTop: 0 }}>Кластеры</h2>
         <p className="muted" style={{ marginTop: 0 }}>
-          Группировка похожих комментариев и паттернов. В демо показываем seed‑кластеры; новые заметки могут
-          попадать в существующие паттерны.
+          Группировка похожих комментариев и паттернов. Новые заметки автоматически сопоставляются с существующими
+          кластерами.
         </p>
 
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
@@ -72,7 +72,7 @@ export function ClustersPage() {
                     {c.topic} · {c.sentiment} · {c.count} заметок
                   </div>
                 </div>
-                <span className="badge">{c.emerging ? "emerging" : "stable"}</span>
+                <span className="badge">{c.emerging ? "растущий" : "стабильный"}</span>
               </div>
               <div style={{ marginTop: 10 }} className="muted">
                 {c.summary}
@@ -83,7 +83,7 @@ export function ClustersPage() {
       </section>
 
       <section className="card">
-        <h2 style={{ marginTop: 0 }}>Примеры (evidence)</h2>
+        <h2 style={{ marginTop: 0 }}>Примеры и доказательства</h2>
         <p className="muted" style={{ marginTop: 0 }}>
           Контекст сохраняется: каждый паттерн подкреплён реальными цитатами.
         </p>
@@ -91,7 +91,7 @@ export function ClustersPage() {
           {selectedEvidence.map((ex) => (
             <div key={ex.noteId} className="card" style={{ padding: 12 }}>
               <div className="muted" style={{ marginBottom: 6 }}>
-                noteId: {ex.noteId}
+                ID заметки: {ex.noteId}
               </div>
               <div>{ex.text}</div>
             </div>

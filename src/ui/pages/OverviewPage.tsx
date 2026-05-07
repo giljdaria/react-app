@@ -18,13 +18,13 @@ export function OverviewPage() {
       <section className="card">
         <h2 style={{ marginTop: 0 }}>Сентимент по времени</h2>
         <p className="muted" style={{ marginTop: 0 }}>
-          Агрегация по всем заметкам (seed + ваши добавленные).
+          Агрегация по всем заметкам (включая добавленные вами).
         </p>
         <div style={{ height: 280 }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={dashboard?.sentimentSeries ?? []} margin={{ left: 8, right: 8, top: 10 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.08)" />
-              <XAxis dataKey="month" stroke="rgba(234,240,255,0.7)" />
+              <XAxis dataKey="month" stroke="rgba(234,240,255,0.7)" interval={0} minTickGap={0} tickMargin={8} />
               <YAxis stroke="rgba(234,240,255,0.7)" />
               <Tooltip
                 contentStyle={{
@@ -38,20 +38,6 @@ export function OverviewPage() {
               <Area type="monotone" dataKey="negative" stackId="1" stroke="#ff5d7a" fill="#ff5d7a" fillOpacity={0.25} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
-      </section>
-
-      <section className="card">
-        <h2 style={{ marginTop: 0 }}>Облако тем (top)</h2>
-        <p className="muted" style={{ marginTop: 0 }}>
-          Темы определяются AI по заметкам.
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-          {(dashboard?.topics ?? []).slice(0, 18).map((t) => (
-            <span key={t.topic} className="badge" title={`${t.count} упоминаний`}>
-              {t.topic} · {t.count}
-            </span>
-          ))}
         </div>
       </section>
 
@@ -86,16 +72,16 @@ export function OverviewPage() {
       </section>
 
       <section className="card">
-        <h2 style={{ marginTop: 0 }}>Actionable insights (demo)</h2>
+        <h2 style={{ marginTop: 0 }}>Рекомендации</h2>
         <p className="muted" style={{ marginTop: 0 }}>
-          Пример инсайтов с действиями и цитатами‑доказательствами (seed).
+          Сформулированные выводы, действия и подтверждающие цитаты из заметок.
         </p>
         <div style={{ display: "grid", gap: 12 }}>
           {(insights?.insights ?? []).slice(0, 3).map((ins) => (
             <div key={ins.title} className="card" style={{ padding: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                 <div style={{ fontWeight: 800 }}>{ins.title}</div>
-                <span className="badge">conf {Math.round(ins.confidence * 100)}%</span>
+                <span className="badge">уверенность {Math.round(ins.confidence * 100)}%</span>
               </div>
               <div className="muted" style={{ marginTop: 6 }}>
                 {ins.observation}
@@ -112,13 +98,11 @@ export function OverviewPage() {
               </div>
               <div style={{ marginTop: 10 }}>
                 <div className="muted" style={{ fontWeight: 700, marginBottom: 6 }}>
-                  Evidence
+                  Доказательства
                 </div>
                 <ul style={{ margin: 0, paddingLeft: 18 }}>
-                  {ins.evidence.slice(0, 3).map((e) => (
-                    <li key={e.noteId}>
-                      <span className="muted">[{e.noteId}]</span> {e.quote}
-                    </li>
+                  {ins.evidence.slice(0, 3).map((e, idx) => (
+                    <li key={`${e.noteId}_${idx}`}>{e.quote}</li>
                   ))}
                 </ul>
               </div>

@@ -22,13 +22,13 @@ export function TrendsPage() {
 
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <button className="btn" onClick={() => setWindow("3m")} disabled={window === "3m"}>
-            3m
+            3 мес.
           </button>
           <button className="btn" onClick={() => setWindow("6m")} disabled={window === "6m"}>
-            6m
+            6 мес.
           </button>
           <button className="btn" onClick={() => setWindow("12m")} disabled={window === "12m"}>
-            12m
+            12 мес.
           </button>
         </div>
 
@@ -36,7 +36,7 @@ export function TrendsPage() {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={series} margin={{ left: 8, right: 8, top: 10 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.08)" />
-              <XAxis dataKey="month" stroke="rgba(234,240,255,0.7)" />
+              <XAxis dataKey="month" stroke="rgba(234,240,255,0.7)" interval={0} minTickGap={0} tickMargin={8} />
               <YAxis stroke="rgba(234,240,255,0.7)" />
               <Tooltip
                 contentStyle={{

@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 type Env = {
+  ANTHROPIC_API_KEY?: string;
+  ANTHROPIC_MODEL?: string;
   OPENROUTER_API_KEY?: string;
   OPENROUTER_MODEL?: string;
   OPENROUTER_SITE_URL?: string;
@@ -26,7 +28,7 @@ function jsonResponse(body: unknown, status = 200) {
 
 async function callOpenRouter(env: Env, prompt: string) {
   const apiKey = env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error("Missing OPENROUTER_API_KEY (set as Cloudflare secret).");
+  if (!apiKey) throw new Error("Не задан OPENROUTER_API_KEY (добавьте secret в Cloudflare).");
   const model = env.OPENROUTER_MODEL ?? "anthropic/claude-3.5-sonnet";
 
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -53,11 +55,59 @@ async function callOpenRouter(env: Env, prompt: string) {
       ],
     }),
   });
-  if (!res.ok) throw new Error(`OpenRouter error: ${res.status} ${await res.text().catch(() => "")}`);
+  if (!res.ok) throw new Error(`Ошибка OpenRouter: ${res.status} ${await res.text().catch(() => "")}`);
   const json = await res.json();
   const content = json?.choices?.[0]?.message?.content;
-  if (typeof content !== "string" || !content.trim()) throw new Error("Empty model response.");
+  if (typeof content !== "string" || !content.trim()) throw new Error("Пустой ответ модели.");
   return content;
+}
+
+async function callAnthropic(env: Env, prompt: string) {
+  const apiKey = env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("Не задан ANTHROPIC_API_KEY (добавьте secret в Cloudflare).");
+
+  const model = env.ANTHROPIC_MODEL ?? "claude-3-5-sonnet-latest";
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1200,
+      temperature: 0.2,
+      system: [
+        "Ты формируешь рекомендации по полевым заметкам.",
+        "Возвращай ТОЛЬКО валидный JSON, без markdown и лишнего текста.",
+        "Инсайты должны быть основаны на агрегатах и предоставленных цитатах.",
+      ].join(" "),
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  if (!res.ok) throw new Error(`Ошибка Anthropic: ${res.status} ${await res.text().catch(() => "")}`);
+  const json = await res.json();
+  const content = json?.content?.[0]?.text;
+  if (typeof content !== "string" || !content.trim()) throw new Error("Пустой ответ модели.");
+  return content;
+}
+
+function extractFirstJsonObject(text: string) {
+  const s = text.indexOf("{");
+  if (s === -1) return null;
+  let depth = 0;
+  for (let i = s; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) return text.slice(s, i + 1);
+    }
+  }
+  return null;
 }
 
 export async function onRequestPost(context: { request: Request; env: Env }) {
@@ -66,23 +116,33 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     const { scope, aggregates, evidence } = RequestSchema.parse(raw);
 
     const prompt = [
-      "You are generating actionable insights for pharma marketing and product.",
-      "Input: aggregated metrics + evidence quotes from field notes.",
-      "Output: JSON schema:",
+      "Сгенерируй рекомендации для маркетинга/продукта на основе агрегатов и цитат из полевых заметок.",
+      "Вход: агрегированные метрики + цитаты-доказательства.",
+      "Выход: JSON по схеме:",
       '{ "insights": [{ "title": string, "observation": string, "evidence": [{ "noteId": string, "quote": string }], "recommendedActions": [string], "confidence": number }] }',
       "",
       `scope: ${JSON.stringify(scope)}`,
       `aggregates: ${JSON.stringify(aggregates)}`,
       `evidence_quotes: ${JSON.stringify(evidence)}`,
       "",
-      "Rules:",
-      "- Must include 2-5 evidence quotes per insight when possible.",
-      "- Actions must be concrete (materials, studies, training, positioning, pricing, FAQ).",
-      "- Preserve nuance: do not over-generalize beyond evidence.",
+      "Правила:",
+      "- По возможности 2-5 цитат-доказательств на инсайт.",
+      "- Действия должны быть конкретными (материалы, исследования, обучение, позиционирование, цена, FAQ).",
+      "- Не обобщай сильнее, чем позволяют доказательства.",
     ].join("\n");
 
-    const content = await callOpenRouter(context.env, prompt);
-    const parsed = JSON.parse(content);
+    const content = context.env.ANTHROPIC_API_KEY
+      ? await callAnthropic(context.env, prompt)
+      : await callOpenRouter(context.env, prompt);
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      const extracted = extractFirstJsonObject(content);
+      if (!extracted) throw new Error("Модель вернула не-JSON. Проверьте модель/промпт.");
+      parsed = JSON.parse(extracted);
+    }
     return jsonResponse(parsed, 200);
   } catch (e: any) {
     return jsonResponse({ error: e?.message ?? "Unknown error" }, 500);
