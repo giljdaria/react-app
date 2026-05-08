@@ -40,7 +40,13 @@ export function OverviewPage() {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={dashboard?.sentimentSeries ?? []} margin={{ left: 8, right: 8, top: 10 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.08)" />
-              <XAxis dataKey="month" stroke="rgba(234,240,255,0.7)" interval={0} minTickGap={0} tickMargin={8} />
+              <XAxis
+                dataKey="month"
+                stroke="rgba(234,240,255,0.7)"
+                interval={0}
+                tick={{ fill: "rgba(234,240,255,0.7)", fontSize: 11, angle: -90, textAnchor: "end", dy: 4 }}
+                height={56}
+              />
               <YAxis stroke="rgba(234,240,255,0.7)" />
               <Tooltip
                 contentStyle={{
