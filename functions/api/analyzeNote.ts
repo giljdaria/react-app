@@ -6,8 +6,6 @@ const RequestSchema = z.object({
 });
 
 type Env = {
-  ANTHROPIC_API_KEY?: string;
-  ANTHROPIC_MODEL?: string;
   OPENROUTER_API_KEY?: string;
   OPENROUTER_MODEL?: string;
   OPENROUTER_SITE_URL?: string;
@@ -41,43 +39,6 @@ function extractFirstJsonObject(text: string) {
     }
   }
   return null;
-}
-
-async function callAnthropic(env: Env, prompt: string) {
-  const apiKey = env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("Не задан ANTHROPIC_API_KEY (добавьте secret в Cloudflare).");
-
-  const model = env.ANTHROPIC_MODEL ?? "claude-3-5-sonnet-latest";
-
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 800,
-      temperature: 0.1,
-      system: [
-        "Ты аналитический ассистент: классифицируй заметку визита по темам и тональности по каждой теме.",
-        "Возвращай ТОЛЬКО валидный JSON без markdown и без лишнего текста.",
-        "Строго следуй схеме из пользовательского сообщения.",
-      ].join(" "),
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Ошибка Anthropic: ${res.status} ${text}`);
-  }
-
-  const json = await res.json();
-  const content = json?.content?.[0]?.text;
-  if (typeof content !== "string" || !content.trim()) throw new Error("Пустой ответ модели.");
-  return content;
 }
 
 async function callOpenRouter(env: Env, prompt: string) {
@@ -145,9 +106,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       `text: ${text}`,
     ].join("\n");
 
-    const content = context.env.ANTHROPIC_API_KEY
-      ? await callAnthropic(context.env, prompt)
-      : await callOpenRouter(context.env, prompt);
+    const content = await callOpenRouter(context.env, prompt);
 
     // Best-effort JSON parse; validate lightly.
     let parsed: any;

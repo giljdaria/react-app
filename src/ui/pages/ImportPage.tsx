@@ -59,7 +59,7 @@ export function ImportPage() {
         <h2 style={{ marginTop: 0 }}>Импорт / ручной ввод</h2>
         <p className="muted" style={{ marginTop: 0 }}>
           Для новых заметок сервис делает онлайн‑анализ через серверное API (Cloudflare Functions). Ключ доступа к
-          Claude хранится на сервере и в браузер не попадает.
+          OpenRouter хранится на сервере и в браузер не попадает.
         </p>
 
         <div className="grid" style={{ gap: 10 }}>

@@ -43,16 +43,11 @@ npm run dev
 
 Архив создаётся в корне проекта как `ai-feedback-analyzer.zip` (без `node_modules`, `dist`, `.git`).
 
-## Онлайн‑AI (Claude через Functions)
+## Онлайн‑AI (через OpenRouter)
 
 ### Secrets
 
 **Нельзя** хранить ключ в браузере. Ключ задаётся как secret на стороне Cloudflare:
-
-- `ANTHROPIC_API_KEY` — ключ Anthropic (Claude)
-- (опционально) `ANTHROPIC_MODEL` — например `claude-3-5-sonnet-latest`
-
-Альтернатива (если вы используете OpenRouter вместо прямого Anthropic):
 
 - `OPENROUTER_API_KEY` — ключ OpenRouter
 - (опционально) `OPENROUTER_MODEL` — например `anthropic/claude-sonnet-latest` (актуальный Sonnet на стороне OpenRouter)

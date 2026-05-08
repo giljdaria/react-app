@@ -1,8 +1,6 @@
 import { z } from "zod";
 
 type Env = {
-  ANTHROPIC_API_KEY?: string;
-  ANTHROPIC_MODEL?: string;
   OPENROUTER_API_KEY?: string;
   OPENROUTER_MODEL?: string;
   OPENROUTER_SITE_URL?: string;
@@ -62,39 +60,6 @@ async function callOpenRouter(env: Env, prompt: string) {
   return content;
 }
 
-async function callAnthropic(env: Env, prompt: string) {
-  const apiKey = env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("Не задан ANTHROPIC_API_KEY (добавьте secret в Cloudflare).");
-
-  const model = env.ANTHROPIC_MODEL ?? "claude-3-5-sonnet-latest";
-
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 1200,
-      temperature: 0.2,
-      system: [
-        "Ты формируешь рекомендации по полевым заметкам.",
-        "Возвращай ТОЛЬКО валидный JSON, без markdown и лишнего текста.",
-        "Инсайты должны быть основаны на агрегатах и предоставленных цитатах.",
-      ].join(" "),
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-
-  if (!res.ok) throw new Error(`Ошибка Anthropic: ${res.status} ${await res.text().catch(() => "")}`);
-  const json = await res.json();
-  const content = json?.content?.[0]?.text;
-  if (typeof content !== "string" || !content.trim()) throw new Error("Пустой ответ модели.");
-  return content;
-}
-
 function extractFirstJsonObject(text: string) {
   const s = text.indexOf("{");
   if (s === -1) return null;
@@ -131,9 +96,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       "- Не обобщай сильнее, чем позволяют доказательства.",
     ].join("\n");
 
-    const content = context.env.ANTHROPIC_API_KEY
-      ? await callAnthropic(context.env, prompt)
-      : await callOpenRouter(context.env, prompt);
+    const content = await callOpenRouter(context.env, prompt);
 
     let parsed: any;
     try {
