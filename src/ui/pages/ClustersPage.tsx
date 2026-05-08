@@ -1,6 +1,37 @@
 import { useMemo, useState } from "react";
 import { useDemoData } from "../state/useDemoData";
 
+const TOPIC_LABELS: Record<string, string> = {
+  efficacy: "Эффективность",
+  safety: "Безопасность",
+  price: "Цена",
+  convenience: "Удобство",
+  competition: "Конкуренты",
+  other: "Прочее",
+  // Already Russian - keep as-is
+  "Безопасность": "Безопасность",
+  "Эффективность": "Эффективность",
+  "Удобство": "Удобство",
+};
+
+const SENTIMENT_LABELS: Record<string, string> = {
+  positive: "позитивный",
+  neutral: "нейтральный",
+  negative: "негативный",
+  "позитивный": "позитивный",
+  "нейтральный": "нейтральный",
+  "негативный": "негативный",
+};
+
+const SENTIMENT_DOT: Record<string, string> = {
+  positive: "#3ee6b0",
+  negative: "#ff5d7a",
+  neutral: "#7aa7ff",
+  "позитивный": "#3ee6b0",
+  "негативный": "#ff5d7a",
+  "нейтральный": "#7aa7ff",
+};
+
 export function ClustersPage() {
   const { clusters, drugs, doctors, notes } = useDemoData();
   const [topic, setTopic] = useState<string>("all");
@@ -23,11 +54,25 @@ export function ClustersPage() {
     return clusters.find((c) => c.id === id) ?? null;
   }, [clusters, filtered, selectedClusterId]);
 
+  // Карта ID заметок -> полный текст
+  const noteMap = useMemo(() => new Map(notes.map((n) => [n.id, n])), [notes]);
+
   const selectedEvidence = useMemo(() => {
     if (!selected) return [];
-    const map = new Map(notes.map((n) => [n.id, n.text]));
-    return selected.examples.map((ex) => ({ noteId: ex.noteId, text: map.get(ex.noteId) ?? ex.text }));
-  }, [notes, selected]);
+    return selected.examples.map((ex, idx) => {
+      const note = noteMap.get(ex.noteId);
+      return {
+        noteId: ex.noteId,
+        text: note?.text ?? ex.text,
+        noteNum: idx + 1,
+        found: !!note,
+      };
+    });
+  }, [noteMap, selected]);
+
+  const topicLabel = (t: string) => TOPIC_LABELS[t] ?? t;
+  const sentimentLabel = (s: string) => SENTIMENT_LABELS[s] ?? s;
+  const sentimentColor = (s: string) => SENTIMENT_DOT[s] ?? "#7aa7ff";
 
   return (
     <div className="grid cols-2">
@@ -40,10 +85,10 @@ export function ClustersPage() {
 
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <span className="muted">Тема</span>
-          <select className="select" style={{ width: 280 }} value={topic} onChange={(e) => setTopic(e.target.value)}>
+          <select className="select" style={{ width: 220 }} value={topic} onChange={(e) => setTopic(e.target.value)}>
             {topics.map((t) => (
               <option key={t} value={t}>
-                {t}
+                {t === "all" ? "Все темы" : topicLabel(t)}
               </option>
             ))}
           </select>
@@ -52,33 +97,64 @@ export function ClustersPage() {
         </div>
 
         <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
-          {filtered.map((c) => (
-            <button
-              key={c.id}
-              className="card"
-              style={{
-                padding: 12,
-                cursor: "pointer",
-                textAlign: "left",
-                borderColor:
-                  (selectedClusterId ?? filtered[0]?.id) === c.id ? "rgba(122,167,255,0.55)" : "rgba(255,255,255,0.12)",
-              }}
-              onClick={() => setSelectedClusterId(c.id)}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div>
-                  <div style={{ fontWeight: 800 }}>{c.title}</div>
-                  <div className="muted">
-                    {c.topic} · {c.sentiment} · {c.count} заметок
+          {filtered.map((c) => {
+            const isActive = (selectedClusterId ?? filtered[0]?.id) === c.id;
+            const dotColor = sentimentColor(c.sentiment);
+            return (
+              <button
+                key={c.id}
+                className="card"
+                style={{
+                  padding: 12,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  borderColor: isActive ? "rgba(122,167,255,0.55)" : "rgba(255,255,255,0.12)",
+                  background: isActive ? "rgba(122,167,255,0.07)" : "rgba(255,255,255,0.06)",
+                }}
+                onClick={() => setSelectedClusterId(c.id)}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                  <div>
+                    <div style={{ fontWeight: 800 }}>{c.title}</div>
+                    <div className="muted" style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+                      <span>{topicLabel(c.topic)}</span>
+                      <span>·</span>
+                      <span
+                        style={{
+                          color: dotColor,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            background: dotColor,
+                            display: "inline-block",
+                          }}
+                        />
+                        {sentimentLabel(c.sentiment)}
+                      </span>
+                      <span>·</span>
+                      <span>{c.count} заметок</span>
+                    </div>
                   </div>
+                  <span className="badge" style={{ flexShrink: 0, alignSelf: "flex-start" }}>
+                    {c.emerging ? "🔥 растущий" : "📊 стабильный"}
+                  </span>
                 </div>
-                <span className="badge">{c.emerging ? "растущий" : "стабильный"}</span>
-              </div>
-              <div style={{ marginTop: 10 }} className="muted">
-                {c.summary}
-              </div>
-            </button>
-          ))}
+                <div style={{ marginTop: 10 }} className="muted">
+                  {c.summary}
+                </div>
+              </button>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="muted">По выбранной теме кластеров нет.</div>
+          )}
         </div>
       </section>
 
@@ -87,19 +163,49 @@ export function ClustersPage() {
         <p className="muted" style={{ marginTop: 0 }}>
           Контекст сохраняется: каждый паттерн подкреплён реальными цитатами.
         </p>
+
+        {selected && (
+          <div
+            className="muted"
+            style={{
+              marginBottom: 14,
+              fontSize: 13,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <span style={{ fontWeight: 700, color: "#eaf0ff" }}>{selected.title}</span>
+            <span>·</span>
+            <span>{selectedEvidence.length} цитат</span>
+          </div>
+        )}
+
         <div style={{ display: "grid", gap: 10 }}>
-          {selectedEvidence.map((ex) => (
-            <div key={ex.noteId} className="card" style={{ padding: 12 }}>
-              <div className="muted" style={{ marginBottom: 6 }}>
-                ID заметки: {ex.noteId}
+          {selectedEvidence.map((ex, idx) => (
+            <div key={idx} className="card" style={{ padding: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span
+                  className="badge"
+                  style={{ fontSize: 11, background: "rgba(122,167,255,0.1)", borderColor: "rgba(122,167,255,0.3)" }}
+                >
+                  Цитата #{idx + 1}
+                </span>
+                {!ex.found && (
+                  <span className="badge" style={{ fontSize: 11, color: "#ff8fa1", borderColor: "#ff8fa1" }}>
+                    текст из кластера
+                  </span>
+                )}
               </div>
-              <div>{ex.text}</div>
+              <div style={{ fontSize: 14, lineHeight: 1.55 }}>{ex.text}</div>
             </div>
           ))}
-          {!selected && <div className="muted">Кластеры ещё не загружены.</div>}
+          {!selected && <div className="muted">Выберите кластер слева, чтобы увидеть цитаты.</div>}
+          {selected && selectedEvidence.length === 0 && (
+            <div className="muted">Примеры для этого кластера не найдены.</div>
+          )}
         </div>
       </section>
     </div>
   );
 }
-
