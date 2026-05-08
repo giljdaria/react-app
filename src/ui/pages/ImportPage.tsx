@@ -163,8 +163,7 @@ export function ImportPage() {
       <section className="card">
         <h2 style={{ marginTop: 0 }}>Импорт / ручной ввод</h2>
         <p className="muted" style={{ marginTop: 0 }}>
-          Для новых заметок сервис делает онлайн-анализ через серверное API (Cloudflare Functions). Ключ доступа к
-          OpenRouter хранится на сервере и в браузер не попадает.
+          Выберите врача, препарат, дату визита и введите заметку о разговоре. AI проанализирует её и выявит ключевые темы и тональность.
         </p>
 
         <div className="grid" style={{ gap: 10 }}>
