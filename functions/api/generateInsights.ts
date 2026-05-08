@@ -27,7 +27,7 @@ function jsonResponse(body: unknown, status = 200) {
 async function callOpenRouter(env: Env, prompt: string) {
   const apiKey = env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("Не задан OPENROUTER_API_KEY (добавьте secret в Cloudflare).");
-  const model = env.OPENROUTER_MODEL ?? "anthropic/claude-sonnet-latest";
+  const model = env.OPENROUTER_MODEL ?? "meta-llama/llama-3.2-3b-instruct:free";
 
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",

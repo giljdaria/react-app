@@ -50,7 +50,8 @@ npm run dev
 **Нельзя** хранить ключ в браузере. Ключ задаётся как secret на стороне Cloudflare:
 
 - `OPENROUTER_API_KEY` — ключ OpenRouter
-- (опционально) `OPENROUTER_MODEL` — например `anthropic/claude-sonnet-latest` (актуальный Sonnet на стороне OpenRouter)
+- (опционально) `OPENROUTER_MODEL` — например `meta-llama/llama-3.2-3b-instruct:free` (бесплатный вариант)
+- (опционально) Можно использовать бесплатные варианты: `meta-llama/llama-3.2-3b-instruct:free`
 - (опционально) `OPENROUTER_SITE_URL`, `OPENROUTER_APP_NAME` — для заголовков OpenRouter
 
 Локально (для тестов функций) можно использовать `.env`/wrangler, но **не коммитить**.
