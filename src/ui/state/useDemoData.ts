@@ -102,23 +102,31 @@ export function useDemoData() {
   const [trends, setTrends] = useState<Trends | null>(null);
   const [insights, setInsights] = useState<Insights | null>(null);
   const [localNotes, setLocalNotes] = useState<Note[]>([]);
+  // Флаг: localStorage уже прочитан, теперь можно писать
+  const [lsInitialized, setLsInitialized] = useState(false);
 
+  // Читаем localStorage один раз при монтировании
   useEffect(() => {
     const raw = localStorage.getItem(LOCAL_NOTES_KEY);
-    if (!raw) return;
-    try {
-      const json = JSON.parse(raw);
-      const arr = z.array(NoteSchema).parse(json);
-      setLocalNotes(arr);
-    } catch {
-      // ignore
+    if (raw) {
+      try {
+        const json = JSON.parse(raw);
+        const arr = z.array(NoteSchema).parse(json);
+        setLocalNotes(arr);
+      } catch {
+        // повреждённые данные — игнорируем
+      }
     }
+    setLsInitialized(true);
   }, []);
 
+  // Пишем в localStorage только после того, как он был прочитан
   useEffect(() => {
+    if (!lsInitialized) return;
     localStorage.setItem(LOCAL_NOTES_KEY, JSON.stringify(localNotes));
-  }, [localNotes]);
+  }, [localNotes, lsInitialized]);
 
+  // Загружаем демо-данные
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -164,4 +172,3 @@ export function useDemoData() {
 
   return { doctors, drugs, notes, clusters, dashboard, trends, insights, addLocalNote };
 }
-

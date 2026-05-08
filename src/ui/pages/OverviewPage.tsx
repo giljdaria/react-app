@@ -21,6 +21,14 @@ export function OverviewPage() {
     return dashboard?.topBenefits?.slice(0, 5) ?? [];
   }, [dashboard]);
 
+  if (!dashboard) {
+    return (
+      <div className="muted" style={{ textAlign: "center", padding: "48px 0", fontSize: 16 }}>
+        Загрузка данных...
+      </div>
+    );
+  }
+
   return (
     <div className="grid cols-2">
       <section className="card">
@@ -54,7 +62,7 @@ export function OverviewPage() {
         <p className="muted" style={{ marginTop: 0 }}>
           Самые частые негативные паттерны.
         </p>
-        <ol>
+        <ol style={{ paddingLeft: 20, margin: 0 }}>
           {topObjections.map((x) => (
             <li key={x.clusterId} style={{ marginBottom: 10 }}>
               <div style={{ fontWeight: 700 }}>{x.title}</div>
@@ -72,7 +80,7 @@ export function OverviewPage() {
         <p className="muted" style={{ marginTop: 0 }}>
           Самые частые позитивные паттерны.
         </p>
-        <ol>
+        <ol style={{ paddingLeft: 20, margin: 0 }}>
           {topBenefits.map((x) => (
             <li key={x.clusterId} style={{ marginBottom: 10 }}>
               <div style={{ fontWeight: 700 }}>{x.title}</div>
@@ -90,8 +98,13 @@ export function OverviewPage() {
         <p className="muted" style={{ marginTop: 0 }}>
           Приоритетные действия на основе анализа обратной связи — с уровнем уверенности и подтверждающими цитатами.
         </p>
+
+        {!insights && (
+          <div className="muted" style={{ textAlign: "center", padding: "24px 0" }}>Загрузка...</div>
+        )}
+
         <div style={{ display: "grid", gap: 16 }}>
-          {(insights?.insights ?? []).slice(0, 3).map((ins, insIdx) => {
+          {(insights?.insights ?? []).slice(0, 3).map((ins) => {
             const confColor = CONFIDENCE_COLOR(ins.confidence);
             return (
               <div
@@ -203,7 +216,6 @@ export function OverviewPage() {
               </div>
             );
           })}
-          {!insights && <div className="muted">Рекомендации ещё не загружены.</div>}
         </div>
       </section>
     </div>

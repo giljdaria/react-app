@@ -8,10 +8,12 @@ const TOPIC_LABELS: Record<string, string> = {
   convenience: "Удобство",
   competition: "Конкуренты",
   other: "Прочее",
-  // Already Russian - keep as-is
   "Безопасность": "Безопасность",
   "Эффективность": "Эффективность",
   "Удобство": "Удобство",
+  "Цена": "Цена",
+  "Конкуренты": "Конкуренты",
+  "Прочее": "Прочее",
 };
 
 const SENTIMENT_LABELS: Record<string, string> = {
@@ -54,7 +56,6 @@ export function ClustersPage() {
     return clusters.find((c) => c.id === id) ?? null;
   }, [clusters, filtered, selectedClusterId]);
 
-  // Карта ID заметок -> полный текст
   const noteMap = useMemo(() => new Map(notes.map((n) => [n.id, n])), [notes]);
 
   const selectedEvidence = useMemo(() => {
@@ -74,17 +75,24 @@ export function ClustersPage() {
   const sentimentLabel = (s: string) => SENTIMENT_LABELS[s] ?? s;
   const sentimentColor = (s: string) => SENTIMENT_DOT[s] ?? "#7aa7ff";
 
+  if (clusters.length === 0) {
+    return (
+      <div className="muted" style={{ textAlign: "center", padding: "48px 0", fontSize: 16 }}>
+        Загрузка данных...
+      </div>
+    );
+  }
+
   return (
     <div className="grid cols-2">
       <section className="card">
         <h2 style={{ marginTop: 0 }}>Кластеры</h2>
         <p className="muted" style={{ marginTop: 0 }}>
-          Группировка похожих комментариев и паттернов. Новые заметки автоматически сопоставляются с существующими
-          кластерами.
+          Группировка похожих комментариев и паттернов. Новые заметки автоматически сопоставляются с существующими кластерами.
         </p>
 
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          <span className="muted">Тема</span>
+          <span className="muted">Тема:</span>
           <select className="select" style={{ width: 220 }} value={topic} onChange={(e) => setTopic(e.target.value)}>
             {topics.map((t) => (
               <option key={t} value={t}>
@@ -96,7 +104,7 @@ export function ClustersPage() {
           <span className="badge">врачей: {doctors.length}</span>
         </div>
 
-        <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
+        <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
           {filtered.map((c) => {
             const isActive = (selectedClusterId ?? filtered[0]?.id) === c.id;
             const dotColor = sentimentColor(c.sentiment);
@@ -119,14 +127,7 @@ export function ClustersPage() {
                     <div className="muted" style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
                       <span>{topicLabel(c.topic)}</span>
                       <span>·</span>
-                      <span
-                        style={{
-                          color: dotColor,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 4,
-                        }}
-                      >
+                      <span style={{ color: dotColor, display: "flex", alignItems: "center", gap: 4 }}>
                         <span
                           style={{
                             width: 6,
@@ -161,23 +162,17 @@ export function ClustersPage() {
       <section className="card">
         <h2 style={{ marginTop: 0 }}>Примеры и доказательства</h2>
         <p className="muted" style={{ marginTop: 0 }}>
-          Контекст сохраняется: каждый паттерн подкреплён реальными цитатами.
+          Контекст сохраняется: каждый паттерн подкреплён реальными цитатами из заметок.
         </p>
 
         {selected && (
           <div
             className="muted"
-            style={{
-              marginBottom: 14,
-              fontSize: 13,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
+            style={{ marginBottom: 14, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}
           >
             <span style={{ fontWeight: 700, color: "#eaf0ff" }}>{selected.title}</span>
             <span>·</span>
-            <span>{selectedEvidence.length} цитат</span>
+            <span>{selectedEvidence.length} {selectedEvidence.length === 1 ? "цитата" : "цитаты"}</span>
           </div>
         )}
 
@@ -193,7 +188,7 @@ export function ClustersPage() {
                 </span>
                 {!ex.found && (
                   <span className="badge" style={{ fontSize: 11, color: "#ff8fa1", borderColor: "#ff8fa1" }}>
-                    текст из кластера
+                    из архива кластера
                   </span>
                 )}
               </div>
