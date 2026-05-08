@@ -55,7 +55,7 @@ npm run dev
 Альтернатива (если вы используете OpenRouter вместо прямого Anthropic):
 
 - `OPENROUTER_API_KEY` — ключ OpenRouter
-- (опционально) `OPENROUTER_MODEL` — например `anthropic/claude-3.5-sonnet`
+- (опционально) `OPENROUTER_MODEL` — например `anthropic/claude-sonnet-latest` (актуальный Sonnet на стороне OpenRouter)
 - (опционально) `OPENROUTER_SITE_URL`, `OPENROUTER_APP_NAME` — для заголовков OpenRouter
 
 Локально (для тестов функций) можно использовать `.env`/wrangler, но **не коммитить**.

@@ -142,7 +142,7 @@ export function useDemoData() {
       setTrends(trendsJson);
       setInsights(insightsJson);
     })().catch(() => {
-      // ignore for demo
+      /* seed load failed */
     });
     return () => {
       cancelled = true;
