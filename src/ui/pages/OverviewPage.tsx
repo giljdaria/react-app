@@ -2,6 +2,22 @@ import { useMemo } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { useDemoData } from "../state/useDemoData";
 
+function RotatedTick({ x, y, payload }: any) {
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0} y={0} dy={4}
+        textAnchor="end"
+        fill="rgba(234,240,255,0.7)"
+        fontSize={11}
+        transform="rotate(-90)"
+      >
+        {payload.value}
+      </text>
+    </g>
+  );
+}
+
 const CONFIDENCE_COLOR = (conf: number) => {
   if (conf >= 0.7) return "#3ee6b0";
   if (conf >= 0.5) return "#7aa7ff";
@@ -44,7 +60,7 @@ export function OverviewPage() {
                 dataKey="month"
                 stroke="rgba(234,240,255,0.7)"
                 interval={0}
-                tick={{ fill: "rgba(234,240,255,0.7)", fontSize: 11, angle: -90, textAnchor: "end", dy: 4 }}
+                tick={<RotatedTick />}
                 height={56}
               />
               <YAxis stroke="rgba(234,240,255,0.7)" />

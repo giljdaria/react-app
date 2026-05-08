@@ -3,6 +3,22 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianG
 import { useDemoData } from "../state/useDemoData";
 
 // Названия линий для тултипа и легенды
+function RotatedTick({ x, y, payload }: any) {
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0} y={0} dy={4}
+        textAnchor="end"
+        fill="rgba(234,240,255,0.7)"
+        fontSize={11}
+        transform="rotate(-90)"
+      >
+        {payload.value}
+      </text>
+    </g>
+  );
+}
+
 const LINE_NAMES: Record<string, string> = {
   efficacyNeg: "Эффективность (негатив)",
   safetyNeg: "Безопасность (негатив)",
@@ -69,7 +85,7 @@ export function TrendsPage() {
                 dataKey="month"
                 stroke="rgba(234,240,255,0.7)"
                 interval={0}
-                tick={{ fill: "rgba(234,240,255,0.7)", fontSize: 11, angle: -90, textAnchor: "end", dy: 4 }}
+                tick={<RotatedTick />}
                 height={56}
               />
               <YAxis
