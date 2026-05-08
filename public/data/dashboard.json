@@ -7,6 +7,10 @@
     { "topic": "Конкуренты", "count": 14 }
   ],
   "sentimentSeries": [
+    { "month": "2025-06", "positive": 4,  "neutral": 5,  "negative": 2  },
+    { "month": "2025-07", "positive": 4,  "neutral": 6,  "negative": 2  },
+    { "month": "2025-08", "positive": 5,  "neutral": 7,  "negative": 3  },
+    { "month": "2025-09", "positive": 5,  "neutral": 7,  "negative": 3  },
     { "month": "2025-10", "positive": 5,  "neutral": 8,  "negative": 4  },
     { "month": "2025-11", "positive": 7,  "neutral": 11, "negative": 8  },
     { "month": "2025-12", "positive": 9,  "neutral": 13, "negative": 9  },
