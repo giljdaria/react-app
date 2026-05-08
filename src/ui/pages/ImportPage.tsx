@@ -90,15 +90,7 @@ function AnalysisResult({ result }: { result: AnalyzeResponse }) {
               </span>
             </div>
             {t.rationale && (
-              <div
-                className="muted"
-                style={{
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                  marginTop: 2,
-                  paddingLeft: 28,
-                }}
-              >
+              <div className="muted" style={{ fontSize: 13, lineHeight: 1.5, marginTop: 2, paddingLeft: 28 }}>
                 {t.rationale}
               </div>
             )}
@@ -116,7 +108,7 @@ function AnalysisResult({ result }: { result: AnalyzeResponse }) {
 }
 
 export function ImportPage() {
-  const { doctors, drugs, addLocalNote } = useDemoData();
+  const { doctors, drugs, notes, addLocalNote } = useDemoData();
   const [doctorId, setDoctorId] = useState("");
   const [drugId, setDrugId] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -128,6 +120,14 @@ export function ImportPage() {
   const canSubmit = useMemo(() => {
     return FormSchema.safeParse({ doctorId, drugId, date, text }).success;
   }, [doctorId, drugId, date, text]);
+
+  // Только заметки добавленные вручную (source === "manual")
+  const manualNotes = useMemo(() => {
+    return notes.filter((n) => n.source === "manual").slice().reverse();
+  }, [notes]);
+
+  const doctorMap = useMemo(() => new Map(doctors.map((d) => [d.id, d])), [doctors]);
+  const drugMap = useMemo(() => new Map(drugs.map((d) => [d.id, d])), [drugs]);
 
   async function onSubmit() {
     setStatus("loading");
@@ -142,16 +142,14 @@ export function ImportPage() {
     }
 
     try {
-      const note = addLocalNote({
-        doctorId,
-        drugId,
-        date,
-        text,
-        source: "manual",
-      });
+      const note = addLocalNote({ doctorId, drugId, date, text, source: "manual" });
       const analyzed = await analyzeNote({ noteId: note.id, text: note.text });
       setResult(analyzed);
       setStatus("done");
+      // Сброс формы после успеха
+      setText("");
+      setDoctorId("");
+      setDrugId("");
     } catch (e: any) {
       setStatus("error");
       setError(e?.message ?? "Ошибка запроса к AI.");
@@ -159,134 +157,165 @@ export function ImportPage() {
   }
 
   return (
-    <div className="grid cols-2">
-      <section className="card">
-        <h2 style={{ marginTop: 0 }}>Импорт / ручной ввод</h2>
-        <p className="muted" style={{ marginTop: 0 }}>
-          Выберите врача, препарат, дату визита и введите заметку о разговоре. AI проанализирует её и выявит ключевые темы и тональность.
-        </p>
+    <div style={{ display: "grid", gap: 16 }}>
+      {/* Верхняя строка: форма + результат */}
+      <div className="grid cols-2">
+        <section className="card">
+          <h2 style={{ marginTop: 0 }}>Импорт / ручной ввод</h2>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Заметка сохраняется в браузере и сразу видна на других экранах. При следующем деплое данные сбрасываются до демо-набора.
+          </p>
 
-        <div className="grid" style={{ gap: 10 }}>
-          <div>
-            <label className="muted">Врач</label>
-            <select className="select" value={doctorId} onChange={(e) => setDoctorId(e.target.value)}>
-              <option value="">— выберите врача —</option>
-              {doctors.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} · {d.specialty} · {d.region}
-                </option>
-              ))}
-            </select>
+          <div className="grid" style={{ gap: 10 }}>
+            <div>
+              <label className="muted">Врач</label>
+              <select className="select" value={doctorId} onChange={(e) => setDoctorId(e.target.value)}>
+                <option value="">— выберите врача —</option>
+                {doctors.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} · {d.specialty} · {d.region}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="muted">Препарат</label>
+              <select className="select" value={drugId} onChange={(e) => setDrugId(e.target.value)}>
+                <option value="">— выберите препарат —</option>
+                {drugs.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} · {d.drugClass}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="muted">Дата визита</label>
+              <input className="input" value={date} onChange={(e) => setDate(e.target.value)} type="date" />
+            </div>
+
+            <div>
+              <label className="muted">Заметка</label>
+              <textarea
+                className="textarea"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Опишите визит: вопросы врача, возражения по цене или безопасности, положительные комментарии..."
+              />
+            </div>
+
+            <button className="btn" disabled={!canSubmit || status === "loading"} onClick={onSubmit}>
+              {status === "loading" ? "⏳ Анализируем..." : "🔍 Сохранить и проанализировать"}
+            </button>
+
+            {status === "error" && (
+              <div
+                style={{
+                  color: "#ff8fa1",
+                  background: "rgba(255,93,122,0.1)",
+                  border: "1px solid rgba(255,93,122,0.3)",
+                  borderRadius: 10,
+                  padding: "10px 14px",
+                  fontSize: 14,
+                }}
+              >
+                ⚠️ {error}
+              </div>
+            )}
           </div>
+        </section>
 
-          <div>
-            <label className="muted">Препарат</label>
-            <select className="select" value={drugId} onChange={(e) => setDrugId(e.target.value)}>
-              <option value="">— выберите препарат —</option>
-              {drugs.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <section className="card">
+          <h2 style={{ marginTop: 0 }}>Результат AI</h2>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Темы и тональность, выявленные в заметке.
+          </p>
 
-          <div>
-            <label className="muted">Дата визита</label>
-            <input className="input" value={date} onChange={(e) => setDate(e.target.value)} type="date" />
-          </div>
+          {status === "idle" && (
+            <div
+              className="muted"
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, minHeight: 160, textAlign: "center" }}
+            >
+              <span style={{ fontSize: 40 }}>🤖</span>
+              <span>Результаты появятся здесь после анализа</span>
+            </div>
+          )}
 
-          <div>
-            <label className="muted">Заметка</label>
-            <textarea
-              className="textarea"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Опишите визит: что говорил врач, какие были вопросы, возражения или положительные комментарии..."
-            />
-          </div>
+          {status === "loading" && (
+            <div
+              className="muted"
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, minHeight: 160 }}
+            >
+              <span style={{ fontSize: 32 }}>⏳</span>
+              <span>Анализируем заметку...</span>
+            </div>
+          )}
 
-          <button className="btn" disabled={!canSubmit || status === "loading"} onClick={onSubmit}>
-            {status === "loading" ? "⏳ Анализируем..." : "🔍 Проанализировать"}
-          </button>
+          {status === "done" && result && <AnalysisResult result={result} />}
 
           {status === "error" && (
             <div
-              style={{
-                color: "#ff8fa1",
-                background: "rgba(255,93,122,0.1)",
-                border: "1px solid rgba(255,93,122,0.3)",
-                borderRadius: 10,
-                padding: "10px 14px",
-                fontSize: 14,
-              }}
+              className="muted"
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, minHeight: 120, justifyContent: "center" }}
             >
-              ⚠️ {error}
+              <span style={{ fontSize: 32 }}>❌</span>
+              <span>Анализ не удался. Проверьте форму и попробуйте снова.</span>
             </div>
           )}
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <section className="card">
-        <h2 style={{ marginTop: 0 }}>Результат AI</h2>
-        <p className="muted" style={{ marginTop: 0 }}>
-          Темы и тональность, выявленные в заметке.
-        </p>
-
-        {status === "idle" && (
-          <div
-            className="muted"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              minHeight: 160,
-              textAlign: "center",
-            }}
-          >
-            <span style={{ fontSize: 40 }}>🤖</span>
-            <span>Результаты появятся здесь после анализа</span>
+      {/* Нижний блок: список добавленных заметок */}
+      {manualNotes.length > 0 && (
+        <section className="card">
+          <h2 style={{ marginTop: 0 }}>
+            Добавленные заметки{" "}
+            <span className="badge" style={{ fontSize: 13, verticalAlign: "middle" }}>
+              {manualNotes.length}
+            </span>
+          </h2>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Сохранены в вашем браузере — видны на всех экранах. Сбрасываются при обновлении демо-данных.
+          </p>
+          <div style={{ display: "grid", gap: 10 }}>
+            {manualNotes.map((note) => {
+              const doctor = doctorMap.get(note.doctorId);
+              const drug = drugMap.get(note.drugId);
+              return (
+                <div key={note.id} className="card" style={{ padding: "12px 14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 8 }}>
+                    <div>
+                      <span style={{ fontWeight: 700, fontSize: 14 }}>
+                        {doctor?.name ?? note.doctorId}
+                      </span>
+                      {doctor && (
+                        <span className="muted" style={{ fontSize: 12, marginLeft: 8 }}>
+                          {doctor.specialty} · {doctor.region}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      {drug && (
+                        <span className="badge" style={{ fontSize: 11 }}>
+                          {drug.name}
+                        </span>
+                      )}
+                      <span className="badge" style={{ fontSize: 11 }}>
+                        {note.date}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 13, lineHeight: 1.55, color: "rgba(234,240,255,0.85)" }}>
+                    {note.text}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
-
-        {status === "loading" && (
-          <div
-            className="muted"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              minHeight: 160,
-            }}
-          >
-            <span style={{ fontSize: 32 }}>⏳</span>
-            <span>Анализируем заметку...</span>
-          </div>
-        )}
-
-        {status === "done" && result && <AnalysisResult result={result} />}
-
-        {status === "error" && (
-          <div
-            className="muted"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 12,
-              minHeight: 120,
-              justifyContent: "center",
-            }}
-          >
-            <span style={{ fontSize: 32 }}>❌</span>
-            <span>Анализ не удался. Проверьте форму и попробуйте снова.</span>
-          </div>
-        )}
-      </section>
+        </section>
+      )}
     </div>
   );
 }

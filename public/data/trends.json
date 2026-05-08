@@ -1,19 +1,38 @@
 {
   "topicSentimentSeries": [
-    { "month": "2025-12", "efficacyNeg": 0.18, "safetyNeg": 0.22, "priceNeg": 0.12 },
-    { "month": "2026-01", "efficacyNeg": 0.20, "safetyNeg": 0.25, "priceNeg": 0.14 },
-    { "month": "2026-02", "efficacyNeg": 0.24, "safetyNeg": 0.28, "priceNeg": 0.17 },
-    { "month": "2026-03", "efficacyNeg": 0.22, "safetyNeg": 0.34, "priceNeg": 0.15 },
-    { "month": "2026-04", "efficacyNeg": 0.19, "safetyNeg": 0.31, "priceNeg": 0.16 },
-    { "month": "2026-05", "efficacyNeg": 0.17, "safetyNeg": 0.29, "priceNeg": 0.15 }
+    { "month": "2025-10", "efficacyNeg": 0.14, "safetyNeg": 0.18, "priceNeg": 0.10 },
+    { "month": "2025-11", "efficacyNeg": 0.17, "safetyNeg": 0.21, "priceNeg": 0.14 },
+    { "month": "2025-12", "efficacyNeg": 0.19, "safetyNeg": 0.24, "priceNeg": 0.16 },
+    { "month": "2026-01", "efficacyNeg": 0.22, "safetyNeg": 0.27, "priceNeg": 0.18 },
+    { "month": "2026-02", "efficacyNeg": 0.25, "safetyNeg": 0.31, "priceNeg": 0.22 },
+    { "month": "2026-03", "efficacyNeg": 0.23, "safetyNeg": 0.35, "priceNeg": 0.20 },
+    { "month": "2026-04", "efficacyNeg": 0.18, "safetyNeg": 0.30, "priceNeg": 0.19 },
+    { "month": "2026-05", "efficacyNeg": 0.15, "safetyNeg": 0.26, "priceNeg": 0.17 }
   ],
   "emergingClusters": [
     {
+      "clusterId": "c_drug_interactions",
+      "title": "Лекарственные взаимодействия",
+      "growthPct": 67,
+      "reason": "С января по март резко вырос поток вопросов о совместимости — после обсуждений в профессиональных медицинских чатах и на региональных конференциях."
+    },
+    {
+      "clusterId": "c_competition",
+      "title": "Активное продвижение конкурентов",
+      "growthPct": 48,
+      "reason": "Конкурент усилил активность в регионах (Ростов, Уфа, Омск) с февраля. Врачи начали упоминать ценовые сравнения на визитах."
+    },
+    {
+      "clusterId": "c_clinical_success",
+      "title": "Успешные клинические случаи",
+      "growthPct": 35,
+      "reason": "Нарастание позитивных отзывов коррелирует с ростом опыта применения у лояльных врачей — накапливается база для клинических материалов."
+    },
+    {
       "clusterId": "c_safety_titration",
-      "title": "Побочные и титрация дозы",
+      "title": "Побочные эффекты и титрация дозы",
       "growthPct": 42,
-      "reason": "В марте–апреле выросло число запросов о НЯ и титрации после обсуждений в профессиональных чатах."
+      "reason": "В марте–апреле выросло число запросов о НЯ и схемах титрации после обсуждений в профессиональных сообществах."
     }
   ]
 }
-

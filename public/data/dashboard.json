@@ -1,37 +1,63 @@
 {
   "topics": [
-    { "topic": "safety", "count": 18 },
-    { "topic": "efficacy", "count": 14 },
-    { "topic": "convenience", "count": 10 },
-    { "topic": "price", "count": 9 },
-    { "topic": "competition", "count": 8 }
+    { "topic": "Безопасность", "count": 35 },
+    { "topic": "Эффективность", "count": 26 },
+    { "topic": "Цена", "count": 21 },
+    { "topic": "Удобство", "count": 19 },
+    { "topic": "Конкуренты", "count": 14 }
   ],
   "sentimentSeries": [
-    { "month": "2025-12", "positive": 8, "neutral": 12, "negative": 6 },
-    { "month": "2026-01", "positive": 7, "neutral": 10, "negative": 9 },
-    { "month": "2026-02", "positive": 6, "neutral": 9, "negative": 11 },
-    { "month": "2026-03", "positive": 8, "neutral": 10, "negative": 12 },
-    { "month": "2026-04", "positive": 9, "neutral": 11, "negative": 10 },
-    { "month": "2026-05", "positive": 10, "neutral": 9, "negative": 8 }
+    { "month": "2025-10", "positive": 5,  "neutral": 8,  "negative": 4  },
+    { "month": "2025-11", "positive": 7,  "neutral": 11, "negative": 8  },
+    { "month": "2025-12", "positive": 9,  "neutral": 13, "negative": 9  },
+    { "month": "2026-01", "positive": 8,  "neutral": 12, "negative": 11 },
+    { "month": "2026-02", "positive": 7,  "neutral": 10, "negative": 13 },
+    { "month": "2026-03", "positive": 9,  "neutral": 12, "negative": 11 },
+    { "month": "2026-04", "positive": 12, "neutral": 11, "negative": 9  },
+    { "month": "2026-05", "positive": 14, "neutral": 10, "negative": 7  }
   ],
   "topObjections": [
     {
+      "clusterId": "c_price_barrier",
+      "title": "Высокая цена и отсутствие в льготных перечнях",
+      "evidence": "Врачи из Ростова, Уфы, Волгограда сообщают, что пациенты отказываются от терапии из-за стоимости."
+    },
+    {
       "clusterId": "c_safety_titration",
-      "title": "Побочные и титрация дозы",
-      "evidence": "Часто просят памятку по титрации и разбор НЯ."
+      "title": "Неопределённость с титрацией и побочными эффектами",
+      "evidence": "Повторяющийся запрос памятки по схеме титрации и разбору НЯ — у кардиологов и терапевтов."
+    },
+    {
+      "clusterId": "c_drug_interactions",
+      "title": "Нет готовых материалов по лекарственным взаимодействиям",
+      "evidence": "Врачи сами ищут информацию об иАПФ, диуретиках, бета-блокаторах — слайдов для визита нет."
     },
     {
       "clusterId": "c_efficacy_rwe",
-      "title": "Сомнения в эффективности в подгруппах",
-      "evidence": "Нужны RWE/подгруппы (ХБП, коморбидность)."
+      "title": "Сомнения в эффективности при ХБП и ХСН",
+      "evidence": "Часть кардиологов не назначает из-за отсутствия данных RWE по коморбидным подгруппам."
+    },
+    {
+      "clusterId": "c_competition",
+      "title": "Активные конкуренты с более низкой ценой",
+      "evidence": "В ряде регионов конкурент предлагает аналогичный профиль на 15–20% дешевле."
     }
   ],
   "topBenefits": [
     {
       "clusterId": "c_convenience_form",
-      "title": "Удобство формы выпуска",
-      "evidence": "Хвалят схему приёма — усилить в материалах."
+      "title": "Приём 1 раз в день — высоко ценится врачами и пациентами",
+      "evidence": "Режим дозирования является ключевым аргументом назначения у пожилых с полипрагмазией."
+    },
+    {
+      "clusterId": "c_tolerability_positive",
+      "title": "Хорошая переносимость у пожилых пациентов",
+      "evidence": "Кардиологи отмечают меньше жалоб на фоне приёма по сравнению с предыдущей терапией."
+    },
+    {
+      "clusterId": "c_clinical_success",
+      "title": "Успешные случаи у резистентных пациентов",
+      "evidence": "Лояльные врачи сообщают об успехах там, где другие препараты не давали результата."
     }
   ]
 }
-
